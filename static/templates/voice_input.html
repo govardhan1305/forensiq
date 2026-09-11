@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}Voice Input — ForensIQ{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="page-header mb-4">
+    <h1 class="page-title"><i class="bi bi-mic me-2 text-pink"></i>Voice Input Analyzer</h1>
+    <p class="page-sub">Speak a suspicious message — we transcribe it and analyse for threats</p>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <div class="fiq-card text-center">
+        <div class="fiq-card-header"><i class="bi bi-mic me-2 text-pink"></i>Voice Recognition</div>
+        <div class="fiq-card-body py-5">
+          <div class="mic-animation" id="micAnim">
+            <div class="mic-rings"></div>
+            <button class="mic-btn" id="micBtn" onclick="toggleListening()">
+              <i class="bi bi-mic-fill" id="micIcon"></i>
+            </button>
+          </div>
+          <p class="text-muted mt-3 mb-1" id="micStatus">Click the microphone to start speaking</p>
+          <p class="text-muted small">Supports: English, Hindi (language dependent on browser)</p>
+
+          <div class="mt-4">
+            <label class="form-label text-muted">Transcribed Text</label>
+            <textarea class="form-control fiq-input" id="transcribed" rows="5"
+                      placeholder="Your speech will appear here…"></textarea>
+          </div>
+
+          <div class="mt-3 d-flex gap-2 justify-content-center">
+            <button class="btn-fiq-primary" onclick="analyzeTranscribed()">
+              <i class="bi bi-search me-2"></i>Analyse This Text
+            </button>
+            <button class="btn-hero-outline" onclick="document.getElementById('transcribed').value=''">
+              <i class="bi bi-trash3 me-2"></i>Clear
+            </button>
+          </div>
+
+          <div class="tip-box mt-4 text-start">
+            <strong>💡 How to use:</strong> Click the microphone button and speak clearly.
+            Say something like: <em>"You have won 50000 rupees, click the link to claim your prize"</em>.
+            Then click Analyse to check if it's a scam.
+          </div>
+
+          <p class="text-muted small mt-3">
+            <i class="bi bi-info-circle me-1"></i>
+            Voice recognition uses your browser's built-in Web Speech API.
+            Works best in Chrome/Edge.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let recognition = null;
+let listening    = false;
+
+if('webkitSpeechRecognition' in window || 'SpeechRecognition' in window){
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SpeechRec();
+  recognition.continuous    = true;
+  recognition.interimResults = true;
+  recognition.lang          = 'en-IN';
+
+  recognition.onresult = e=>{
+    let final='', interim='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal) final+=e.results[i][0].transcript;
+      else interim+=e.results[i][0].transcript;
+    }
+    document.getElementById('transcribed').value += final;
+    document.getElementById('micStatus').textContent = interim ? '🎤 '+interim : 'Listening…';
+  };
+  recognition.onerror = e=>{
+    document.getElementById('micStatus').textContent='Error: '+e.error;
+    stopListening();
+  };
+  recognition.onend = ()=>{ if(listening) recognition.start(); };
+}else{
+  document.getElementById('micBtn').disabled=true;
+  document.getElementById('micStatus').textContent='Speech recognition not supported in this browser.';
+}
+
+function toggleListening(){
+  listening ? stopListening() : startListening();
+}
+
+function startListening(){
+  if(!recognition) return;
+  listening=true;
+  recognition.start();
+  document.getElementById('micBtn').classList.add('mic-active');
+  document.getElementById('micAnim').classList.add('pulsing');
+  document.getElementById('micIcon').className='bi bi-stop-fill';
+  document.getElementById('micStatus').textContent='Listening…';
+}
+
+function stopListening(){
+  if(!recognition) return;
+  listening=false;
+  recognition.stop();
+  document.getElementById('micBtn').classList.remove('mic-active');
+  document.getElementById('micAnim').classList.remove('pulsing');
+  document.getElementById('micIcon').className='bi bi-mic-fill';
+  document.getElementById('micStatus').textContent='Click the microphone to start speaking';
+}
+
+function analyzeTranscribed(){
+  const text=document.getElementById('transcribed').value.trim();
+  if(!text){ alert('Please record or type a message first.'); return; }
+  const form=document.createElement('form');
+  form.method='POST'; form.action='/analyze/message';
+  const inp=document.createElement('textarea');
+  inp.name='message'; inp.value=text;
+  form.appendChild(inp);
+  document.body.appendChild(form);
+  form.submit();
+}
+</script>
+{% endblock %}

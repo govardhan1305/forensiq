@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Evidence #{{ item.ev_id }} — ForensIQ{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="mb-3">
+    <a href="{{ url_for('evidence_locker') }}" class="back-link"><i class="bi bi-arrow-left me-1"></i>Evidence Locker</a>
+  </div>
+  <div class="page-header mb-4">
+    <h1 class="page-title"><i class="bi bi-file-earmark-lock me-2 text-cyan"></i>Evidence Detail</h1>
+    <p class="page-sub">Case ID: <code class="text-cyan">{{ item.ev_id }}</code></p>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-6">
+      <div class="fiq-card mb-4">
+        <div class="fiq-card-header"><i class="bi bi-info-circle me-2 text-cyan"></i>Case Information</div>
+        <div class="fiq-card-body">
+          <table class="table fiq-meta-table">
+            <tr><th>Type</th><td><span class="type-badge type-{{ item.type }}">{{ item.type }}</span></td></tr>
+            <tr><th>Verdict</th><td><span class="verdict-badge verdict-{{ item.result }}">{{ item.result }}</span></td></tr>
+            <tr><th>Risk Score</th><td><strong class="text-{% if item.risk >= 70 %}red{% elif item.risk >= 40 %}yellow{% else %}green{% endif %}">{{ item.risk }}/100</strong></td></tr>
+            <tr><th>Category</th><td>{{ details.get('category','—') }}</td></tr>
+            <tr><th>Language</th><td>{{ item.language or 'en' }}</td></tr>
+            <tr><th>Date</th><td>{{ item.created }}</td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="fiq-card">
+        <div class="fiq-card-header"><i class="bi bi-file-text me-2 text-cyan"></i>Submitted Content</div>
+        <div class="fiq-card-body">
+          <div class="content-box">{{ item.content }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="fiq-card mb-4">
+        <div class="fiq-card-header"><i class="bi bi-cpu me-2 text-cyan"></i>AI Analysis</div>
+        <div class="fiq-card-body">
+          <p class="result-text mb-3">{{ details.get('explanation','No explanation available.') }}</p>
+          {% if details.get('red_flags') %}
+          <h6 class="result-section-title"><i class="bi bi-flag-fill me-1 text-red"></i>Red Flags</h6>
+          <ul class="flag-list mb-3">{% for f in details.red_flags %}<li><i class="bi bi-x-circle-fill text-red me-1"></i>{{ f }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+      </div>
+      <div class="fiq-card">
+        <div class="fiq-card-header"><i class="bi bi-lightning me-2 text-yellow"></i>Action Guide</div>
+        <div class="fiq-card-body">
+          {% if actions %}
+          <ul class="action-list">{% for a in actions %}<li><i class="bi bi-chevron-right text-cyan me-1"></i>{{ a }}</li>{% endfor %}</ul>
+          {% else %}
+          <p class="text-muted">No specific actions recorded.</p>
+          {% endif %}
+          <div class="mt-3">
+            <a href="{{ url_for('generate_complaint', ev_id=item.ev_id) }}" class="btn-fiq-primary w-100">
+              <i class="bi bi-file-earmark-text me-2"></i>Generate Formal Complaint
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

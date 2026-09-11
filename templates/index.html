@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% block title %}ForensIQ — AI Cyber Forensics Platform{% endblock %}
+
+{% block content %}
+<!-- ══ HERO ══════════════════════════════════════════════ -->
+<section class="hero-section">
+  <div class="hero-grid-bg"></div>
+  <div class="hero-particles" id="particles"></div>
+
+  <div class="container hero-inner text-center">
+    <div class="hero-badge mb-3">
+      <i class="bi bi-shield-check me-1"></i> AI-Powered Cyber Protection
+    </div>
+    <h1 class="hero-title">
+      Smart Forensic<br>
+      <span class="text-gradient">Intelligence</span>
+    </h1>
+    <p class="hero-sub">
+      Detect scams, phishing, and fraud in seconds.<br>
+      Upload evidence. Get instant AI analysis. Stay protected.
+    </p>
+    <div class="hero-stats mb-5">
+      <div class="hstat">
+        <span class="hstat-num">{{ total }}</span>
+        <span class="hstat-label">Cases Analysed</span>
+      </div>
+      <div class="hstat-divider"></div>
+      <div class="hstat">
+        <span class="hstat-num">{{ scams_blocked }}</span>
+        <span class="hstat-label">Threats Detected</span>
+      </div>
+      <div class="hstat-divider"></div>
+      <div class="hstat">
+        <span class="hstat-num">AI</span>
+        <span class="hstat-label">Powered Engine</span>
+      </div>
+    </div>
+    <div class="d-flex flex-wrap justify-content-center gap-3">
+      <a href="{{ url_for('analyze_message') }}" class="btn-hero-primary">
+        <i class="bi bi-play-circle me-2"></i>Start Analyzing
+      </a>
+      <a href="{{ url_for('dashboard') }}" class="btn-hero-outline">
+        <i class="bi bi-speedometer2 me-2"></i>View Dashboard
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FEATURES ══════════════════════════════════════════ -->
+<section class="features-section py-5">
+  <div class="container">
+    <h2 class="section-title text-center mb-2">What We Detect</h2>
+    <p class="section-sub text-center mb-5">Our AI engine analyses multiple types of digital evidence</p>
+
+    <div class="row g-4">
+      {% set features = [
+        ('chat-text-fill',   'text-cyan',    'Message Analyzer',      'Paste any suspicious chat, SMS, or email to instantly detect scams and fraud patterns.',      'analyze_message'),
+        ('link-45deg',       'text-yellow',  'Link & URL Checker',    'Analyse suspicious URLs for phishing, malware, and deceptive redirects.',                      'analyze_link'),
+        ('image-fill',       'text-green',   'Screenshot Analyzer',   'Upload a screenshot — our OCR extracts text and AI analyses it for threats.',                   'analyze_screenshot'),
+        ('briefcase-fill',   'text-orange',  'Job Offer Detector',    'Spot fake job offers, advance-fee scams, and fraudulent recruitment schemes.',                  'analyze_job_offer'),
+        ('archive-fill',     'text-purple',  'Evidence Locker',       'Store and manage all your analysed evidence in a secure local database.',                       'evidence_locker'),
+        ('robot',            'text-pink',    'AI Cyber Assistant',    'Chat with CyberGuard AI for personalised safety advice and threat explanations.',               'chatbot'),
+        ('file-earmark-text','text-cyan',    'Complaint Generator',   'Auto-generate a formatted cybercrime complaint ready to submit to authorities.',                'evidence_locker'),
+        ('lightbulb-fill',   'text-yellow',  'Awareness Hub',         'Stay updated with AI-generated cybersecurity tips and best practices.',                         'awareness'),
+      ] %}
+      {% for icon, color, title, desc, endpoint in features %}
+      <div class="col-sm-6 col-lg-3">
+        <div class="feature-card h-100">
+          <div class="feature-icon {{ color }}">
+            <i class="bi bi-{{ icon }}"></i>
+          </div>
+          <h5 class="feature-title">{{ title }}</h5>
+          <p class="feature-desc">{{ desc }}</p>
+          <a href="{{ url_for(endpoint) }}" class="feature-link">
+            Explore <i class="bi bi-arrow-right ms-1"></i>
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ══ THREAT CATEGORIES ══════════════════════════════════ -->
+<section class="threats-section py-5">
+  <div class="container">
+    <h2 class="section-title text-center mb-2">Common Cyber Threats</h2>
+    <p class="section-sub text-center mb-5">ForensIQ recognises all major threat categories</p>
+    <div class="row g-3">
+      {% set threats = [
+        ('Lottery & Prize Scams',    'trophy-fill',           'text-yellow'),
+        ('Bank & KYC Phishing',      'bank2',                 'text-cyan'),
+        ('Fake Job Offers',          'person-badge-fill',     'text-orange'),
+        ('Investment Fraud',         'graph-up-arrow',        'text-green'),
+        ('Tech Support Scams',       'laptop-fill',           'text-purple'),
+        ('Romance Scams',            'heart-fill',            'text-pink'),
+        ('Courier / Parcel Fraud',   'box-seam-fill',         'text-yellow'),
+        ('Sextortion',               'camera-video-fill',     'text-red'),
+        ('Advance Fee Fraud',        'cash-coin',             'text-green'),
+        ('Phishing Emails',          'envelope-exclamation',  'text-cyan'),
+        ('Crypto Investment Scams',  'currency-bitcoin',      'text-orange'),
+        ('Fake Government Notices',  'building-fill',         'text-purple'),
+      ] %}
+      {% for name, icon, color in threats %}
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="threat-pill {{ color }}">
+          <i class="bi bi-{{ icon }} me-2"></i>{{ name }}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ══ HOW IT WORKS ══════════════════════════════════════ -->
+<section class="howto-section py-5">
+  <div class="container">
+    <h2 class="section-title text-center mb-5">How It Works</h2>
+    <div class="row g-4 justify-content-center">
+      {% set steps = [
+        ('1', 'upload',          'Submit Evidence',      'Paste a message, enter a URL, or upload a screenshot.'),
+        ('2', 'cpu',             'AI Analysis',          'Our engine runs pattern matching and AI forensics.'),
+        ('3', 'shield-check',    'Get Verdict',          'Instant threat verdict with risk score 0–100.'),
+        ('4', 'file-text',       'Take Action',          'Follow the action guide or generate a complaint.'),
+      ] %}
+      {% for num, icon, title, desc in steps %}
+      <div class="col-sm-6 col-lg-3 text-center">
+        <div class="step-card">
+          <div class="step-num">{{ num }}</div>
+          <div class="step-icon"><i class="bi bi-{{ icon }}"></i></div>
+          <h5 class="step-title">{{ title }}</h5>
+          <p class="step-desc">{{ desc }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ══ CTA ════════════════════════════════════════════════ -->
+<section class="cta-section py-5 text-center">
+  <div class="container">
+    <div class="cta-box">
+      <h2 class="mb-2">Stay Safe Online</h2>
+      <p class="text-muted mb-4">
+        One suspicious message could compromise your finances, identity, or privacy.
+        Don't take chances — let AI analyse it first.
+      </p>
+      <a href="{{ url_for('analyze_message') }}" class="btn-hero-primary me-3">
+        <i class="bi bi-shield-plus me-2"></i>Analyse Now — It's Free
+      </a>
+      <a href="{{ url_for('chatbot') }}" class="btn-hero-outline">
+        <i class="bi bi-robot me-2"></i>Ask AI Assistant
+      </a>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Particle animation for hero
+(function(){
+  const c = document.getElementById('particles');
+  if(!c) return;
+  for(let i=0;i<30;i++){
+    const d = document.createElement('div');
+    d.className = 'particle';
+    d.style.left  = Math.random()*100+'%';
+    d.style.top   = Math.random()*100+'%';
+    d.style.animationDelay = Math.random()*4+'s';
+    d.style.animationDuration = (3+Math.random()*4)+'s';
+    c.appendChild(d);
+  }
+})();
+</script>
+{% endblock %}

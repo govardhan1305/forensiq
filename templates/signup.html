@@ -1,0 +1,456 @@
+{% extends "base.html" %}
+{% block title %}Sign Up — ForensIQ{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-grid-bg"></div>
+
+  <div class="auth-particles">
+    <span class="ap" style="left:8%;top:25%;animation-delay:0s"></span>
+    <span class="ap" style="left:30%;top:65%;animation-delay:1s"></span>
+    <span class="ap" style="left:72%;top:10%;animation-delay:2s"></span>
+    <span class="ap" style="left:88%;top:80%;animation-delay:0.5s"></span>
+    <span class="ap" style="left:55%;top:90%;animation-delay:1.5s"></span>
+    <span class="ap" style="left:45%;top:5%;animation-delay:0.8s"></span>
+  </div>
+
+  <div class="auth-container" style="max-width:480px;">
+
+    <!-- Logo -->
+    <div class="auth-logo">
+      <span class="brand-icon" style="font-size:2rem;"><i class="bi bi-shield-lock-fill"></i></span>
+      <span class="brand-text" style="font-size:1.4rem;">ForensIQ</span>
+    </div>
+
+    <!-- Card -->
+    <div class="auth-card">
+      <div class="auth-card-header">
+        <div class="auth-header-icon">
+          <i class="bi bi-person-plus-fill"></i>
+        </div>
+        <h2 class="auth-title">Create Account</h2>
+        <p class="auth-sub">Join the smart forensic intelligence network</p>
+      </div>
+
+      <div class="auth-card-body">
+        <form method="POST" action="{{ url_for('signup') }}" autocomplete="off">
+
+          <!-- Full Name -->
+          <div class="auth-field">
+            <label class="auth-label"><i class="bi bi-person-badge me-1"></i>Full Name</label>
+            <div class="auth-input-wrap">
+              <span class="auth-input-icon"><i class="bi bi-person-badge"></i></span>
+              <input
+                type="text"
+                name="full_name"
+                class="fiq-input auth-input"
+                placeholder="Enter your full name"
+                required autofocus
+              />
+            </div>
+          </div>
+
+          <!-- Username -->
+          <div class="auth-field">
+            <label class="auth-label"><i class="bi bi-at me-1"></i>Username</label>
+            <div class="auth-input-wrap">
+              <span class="auth-input-icon"><i class="bi bi-at"></i></span>
+              <input
+                type="text"
+                name="username"
+                class="fiq-input auth-input"
+                placeholder="Choose a username"
+                required
+              />
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div class="auth-field">
+            <label class="auth-label"><i class="bi bi-envelope me-1"></i>Email Address</label>
+            <div class="auth-input-wrap">
+              <span class="auth-input-icon"><i class="bi bi-envelope"></i></span>
+              <input
+                type="email"
+                name="email"
+                class="fiq-input auth-input"
+                placeholder="Enter your email"
+                required
+              />
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div class="auth-field">
+            <label class="auth-label"><i class="bi bi-lock me-1"></i>Password</label>
+            <div class="auth-input-wrap">
+              <span class="auth-input-icon"><i class="bi bi-lock"></i></span>
+              <input
+                type="password"
+                name="password"
+                id="signupPassword"
+                class="fiq-input auth-input"
+                placeholder="Create a strong password"
+                required
+                oninput="checkStrength(this.value)"
+              />
+              <button type="button" class="auth-eye-btn" onclick="togglePass('signupPassword', this)">
+                <i class="bi bi-eye"></i>
+              </button>
+            </div>
+            <!-- Password strength bar -->
+            <div class="pw-strength-wrap mt-2">
+              <div class="pw-strength-bar">
+                <div class="pw-strength-fill" id="pwFill"></div>
+              </div>
+              <span class="pw-strength-label" id="pwLabel">Enter password</span>
+            </div>
+          </div>
+
+          <!-- Confirm Password -->
+          <div class="auth-field">
+            <label class="auth-label"><i class="bi bi-lock-fill me-1"></i>Confirm Password</label>
+            <div class="auth-input-wrap">
+              <span class="auth-input-icon"><i class="bi bi-lock-fill"></i></span>
+              <input
+                type="password"
+                name="confirm_password"
+                id="confirmPassword"
+                class="fiq-input auth-input"
+                placeholder="Repeat your password"
+                required
+              />
+              <button type="button" class="auth-eye-btn" onclick="togglePass('confirmPassword', this)">
+                <i class="bi bi-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Terms -->
+          <div class="auth-field">
+            <label class="auth-check" style="align-items:flex-start;gap:.5rem;">
+              <input type="checkbox" name="agree_terms" required style="margin-top:3px;" />
+              <span style="font-size:.82rem;color:var(--text-secondary);">
+                I agree to the
+                <a href="#" class="auth-link" style="font-size:.82rem;">Terms of Service</a>
+                and
+                <a href="#" class="auth-link" style="font-size:.82rem;">Privacy Policy</a>
+              </span>
+            </label>
+          </div>
+
+          <!-- Submit -->
+          <button type="submit" class="btn-fiq-primary auth-submit-btn">
+            <i class="bi bi-person-check me-2"></i>Create Account
+          </button>
+
+        </form>
+
+        <!-- Info box -->
+        <div class="tip-box mt-3" style="font-size:.78rem;">
+          <i class="bi bi-shield-check text-cyan me-1"></i>
+          Your data is encrypted and never shared. ForensIQ is for educational and cybercrime awareness purposes only.
+        </div>
+
+      </div>
+
+      <!-- Footer link -->
+      <div class="auth-card-footer">
+        Already have an account?
+        <a href="{{ url_for('login') }}" class="auth-link">Sign in here</a>
+      </div>
+    </div>
+
+    <!-- Security badge -->
+    <div class="auth-security-badge">
+      <i class="bi bi-shield-fill-check text-cyan me-1"></i>
+      <span>256-bit encrypted &amp; secure registration</span>
+    </div>
+
+  </div>
+</div>
+
+<style>
+/* ── Auth Layout ─────────────────────────────────── */
+.auth-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  padding: 2rem 1rem;
+  background: var(--bg-dark);
+}
+
+.auth-grid-bg {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(13,148,136,.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(13,148,136,.07) 1px, transparent 1px);
+  background-size: 36px 36px;
+  mask-image: radial-gradient(ellipse 90% 90% at 50% 50%, black 30%, transparent 100%);
+  pointer-events: none;
+}
+
+.auth-particles { position:absolute; inset:0; pointer-events:none; }
+.ap {
+  position: absolute;
+  width: 4px; height: 4px;
+  background: var(--cyan);
+  border-radius: 50%;
+  opacity: .4;
+  animation: apFloat 6s ease-in-out infinite alternate;
+}
+@keyframes apFloat {
+  from { transform: translateY(0) scale(1); opacity:.4; }
+  to   { transform: translateY(-30px) scale(1.5); opacity:.1; }
+}
+
+.auth-container {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  animation: authFadeIn .5s ease both;
+}
+@keyframes authFadeIn {
+  from { opacity:0; transform:translateY(20px); }
+  to   { opacity:1; transform:none; }
+}
+
+.auth-logo {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+.auth-card {
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 8px 40px rgba(13,148,136,.15);
+}
+
+.auth-card-header {
+  background: var(--bg-card2);
+  border-bottom: 1px solid var(--border-color);
+  padding: 1.75rem 1.75rem 1.25rem;
+  text-align: center;
+}
+
+.auth-header-icon {
+  width: 56px; height: 56px;
+  background: rgba(13,148,136,.12);
+  border: 1px solid rgba(13,148,136,.35);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem;
+  color: var(--cyan);
+  margin: 0 auto .75rem;
+  filter: drop-shadow(0 0 8px var(--cyan));
+}
+
+.auth-title {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 .25rem;
+}
+
+.auth-sub {
+  color: var(--text-muted);
+  font-size: .82rem;
+  margin: 0;
+}
+
+.auth-card-body { padding: 1.5rem 1.75rem; }
+
+.auth-field { margin-bottom: 1rem; }
+
+.auth-label {
+  display: block;
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: .4rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.auth-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.auth-input-icon {
+  position: absolute;
+  left: .75rem;
+  color: var(--cyan);
+  font-size: .9rem;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.auth-input {
+  width: 100%;
+  padding: .6rem .75rem .6rem 2.25rem !important;
+  background: var(--bg-card2) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
+  border-radius: var(--radius-sm) !important;
+  font-size: .88rem !important;
+  transition: border-color .2s, box-shadow .2s !important;
+}
+.auth-input:focus {
+  border-color: var(--cyan) !important;
+  box-shadow: 0 0 0 3px rgba(13,148,136,.18) !important;
+  outline: none !important;
+}
+
+.auth-eye-btn {
+  position: absolute;
+  right: .75rem;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: .9rem;
+  padding: 0;
+  transition: color .2s;
+}
+.auth-eye-btn:hover { color: var(--cyan); }
+
+/* Password strength */
+.pw-strength-wrap {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+}
+.pw-strength-bar {
+  flex: 1;
+  height: 5px;
+  background: var(--bg-card3);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.pw-strength-fill {
+  height: 100%;
+  border-radius: 3px;
+  width: 0%;
+  transition: width .3s, background .3s;
+}
+.pw-strength-label {
+  font-size: .72rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  min-width: 60px;
+}
+
+.auth-check {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  font-size: .82rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.auth-check input { accent-color: var(--cyan); }
+
+.auth-submit-btn {
+  width: 100%;
+  justify-content: center;
+  padding: .7rem !important;
+  font-size: .9rem !important;
+  letter-spacing: .03em;
+  margin-top: .25rem;
+}
+
+.auth-card-footer {
+  background: var(--bg-card2);
+  border-top: 1px solid var(--border-color);
+  padding: 1rem 1.75rem;
+  text-align: center;
+  font-size: .83rem;
+  color: var(--text-muted);
+}
+
+.auth-link {
+  color: var(--cyan);
+  font-weight: 600;
+  text-decoration: none;
+  margin-left: .25rem;
+}
+.auth-link:hover { text-decoration: underline; }
+
+.auth-security-badge {
+  font-size: .75rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+}
+
+.auth-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.auth-forgot {
+  font-size: .82rem;
+  color: var(--cyan);
+  text-decoration: none;
+}
+.auth-forgot:hover { text-decoration: underline; }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function togglePass(id, btn) {
+  const input = document.getElementById(id);
+  const icon  = btn.querySelector('i');
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.className = 'bi bi-eye-slash';
+  } else {
+    input.type = 'password';
+    icon.className = 'bi bi-eye';
+  }
+}
+
+function checkStrength(val) {
+  const fill  = document.getElementById('pwFill');
+  const label = document.getElementById('pwLabel');
+  let score = 0;
+  if (val.length >= 8)               score++;
+  if (/[A-Z]/.test(val))             score++;
+  if (/[0-9]/.test(val))             score++;
+  if (/[^A-Za-z0-9]/.test(val))      score++;
+
+  const levels = [
+    { w:'0%',   bg:'transparent',       txt:'Enter password' },
+    { w:'25%',  bg:'#dc2626',           txt:'Weak' },
+    { w:'50%',  bg:'#d97706',           txt:'Fair' },
+    { w:'75%',  bg:'#059669',           txt:'Good' },
+    { w:'100%', bg:'#0d9488',           txt:'Strong 🔒' },
+  ];
+  const l = levels[score];
+  fill.style.width      = l.w;
+  fill.style.background = l.bg;
+  label.textContent     = l.txt;
+  label.style.color     = l.bg || 'var(--text-muted)';
+}
+</script>
+{% endblock %}

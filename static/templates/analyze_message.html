@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% block title %}Message Analyzer — ForensIQ{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="page-header mb-4">
+    <h1 class="page-title"><i class="bi bi-chat-text me-2 text-cyan"></i>Message Analyzer</h1>
+    <p class="page-sub">Paste any suspicious message, SMS, email, or chat to detect scams and fraud</p>
+  </div>
+
+  <div class="row g-4">
+    <!-- Input Form -->
+    <div class="col-lg-5">
+      <div class="fiq-card">
+        <div class="fiq-card-header"><i class="bi bi-pencil-square me-2 text-cyan"></i>Enter Message</div>
+        <div class="fiq-card-body">
+          <form method="POST">
+            <div class="mb-3">
+              <label class="form-label text-muted">Suspicious Message / Chat / Email</label>
+              <textarea name="message" class="form-control fiq-input" rows="10"
+                placeholder="Paste the suspicious message here…
+Example: 'You have won ₹5 lakh in our lucky draw. Click the link to claim your prize. Send OTP to verify.'"
+                required>{% if result %}{{ request.form.message }}{% endif %}</textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-muted">Language</label>
+              <select name="language" class="form-select fiq-input">
+                <option value="en">English</option>
+                <option value="hi">Hindi</option>
+                <option value="te">Telugu</option>
+                <option value="ta">Tamil</option>
+                <option value="bn">Kannada</option>
+              </select>
+            </div>
+            <button type="submit" class="btn-fiq-primary w-100">
+              <i class="bi bi-search me-2"></i>Analyse Message
+            </button>
+          </form>
+
+          <!-- Sample threats -->
+          <div class="mt-3">
+            <p class="text-muted small mb-2">Try a sample:</p>
+            <div class="d-flex flex-wrap gap-1">
+              {% set samples = [
+                ('Lottery Scam', 'Congratulations! You have won $10,000 in our online lottery. Click here to claim your prize. Send your bank details and a processing fee of $50 to receive your winnings.'),
+                ('Bank Phishing', 'ALERT: Your SBI account has been suspended due to suspicious activity. Verify your Aadhaar and OTP immediately at sbi-secure-verify.xyz or your account will be blocked.'),
+                ('Job Scam', 'Urgent! Work from home opportunity. Earn Rs.50000/day. No experience needed. Just pay Rs.2000 registration fee. WhatsApp us now!'),
+              ] %}
+              {% for name, text in samples %}
+              <button class="sample-btn" onclick="document.querySelector('textarea').value=`{{ text }}`">{{ name }}</button>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Panel -->
+    <div class="col-lg-7">
+      {% if result %}
+      {% set verdict = result.verdict %}
+      <div class="result-card verdict-{{ verdict }}">
+        <!-- Verdict Header -->
+        <div class="result-header">
+          <div class="verdict-icon verdict-icon-{{ verdict }}">
+            {% if verdict == 'SAFE' %}<i class="bi bi-shield-check-fill"></i>
+            {% elif verdict in ('SCAM','FRAUD') %}<i class="bi bi-exclamation-octagon-fill"></i>
+            {% elif verdict == 'PHISHING' %}<i class="bi bi-link-45deg"></i>
+            {% else %}<i class="bi bi-question-circle-fill"></i>{% endif %}
+          </div>
+          <div>
+            <div class="verdict-label">Verdict: <span class="verdict-{{ verdict }}">{{ verdict }}</span></div>
+            <div class="verdict-cat">{{ result.get('category','—') }}</div>
+          </div>
+          <div class="ms-auto text-end">
+            <div class="risk-score verdict-{{ verdict }}">{{ result.risk_score }}</div>
+            <div class="text-muted small">Risk Score</div>
+          </div>
+        </div>
+
+        <!-- Risk Gauge -->
+        <div class="risk-gauge-bar mb-3">
+          <div class="risk-gauge-fill" style="width:{{ result.risk_score }}%"
+               data-risk="{{ result.risk_score }}"></div>
+        </div>
+
+        <!-- Explanation -->
+        <div class="result-section">
+          <h6 class="result-section-title"><i class="bi bi-info-circle me-1 text-cyan"></i>AI Explanation</h6>
+          <p class="result-text">{{ result.get('explanation','') }}</p>
+        </div>
+
+        <!-- Red Flags -->
+        {% if result.get('red_flags') %}
+        <div class="result-section">
+          <h6 class="result-section-title"><i class="bi bi-flag-fill me-1 text-red"></i>Red Flags Detected</h6>
+          <ul class="flag-list">
+            {% for flag in result.red_flags %}
+            <li><i class="bi bi-x-circle-fill text-red me-1"></i>{{ flag }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+
+        <!-- Action Guide -->
+        {% if result.get('actions') %}
+        <div class="result-section">
+          <h6 class="result-section-title"><i class="bi bi-lightning-fill me-1 text-yellow"></i>Recommended Actions</h6>
+          <ul class="action-list">
+            {% for action in result.actions %}
+            <li><i class="bi bi-chevron-right text-cyan me-1"></i>{{ action }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+
+        <!-- Similar Scams -->
+        {% if result.get('similar') %}
+        <div class="result-section">
+          <h6 class="result-section-title"><i class="bi bi-diagram-3 me-1 text-purple"></i>Similar Scam Patterns</h6>
+          {% for s in result.similar %}
+          <div class="similar-item">
+            <span class="similar-cat">{{ s.category }}</span>
+            <span class="similar-score">{{ s.match_score }}% match</span>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Save Evidence Links -->
+        <div class="result-footer">
+          <span class="text-muted small">Evidence ID: <code class="text-cyan">{{ result.ev_id }}</code></span>
+          <div class="d-flex gap-2">
+            <a href="{{ url_for('generate_complaint', ev_id=result.ev_id) }}" class="btn-sm-outline">
+              <i class="bi bi-file-text me-1"></i>Generate Complaint
+            </a>
+            <a href="{{ url_for('view_evidence', ev_id=result.ev_id) }}" class="btn-sm-outline">
+              <i class="bi bi-eye me-1"></i>View Evidence
+            </a>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      <div class="fiq-card empty-analyze">
+        <div class="empty-analyze-inner">
+          <i class="bi bi-shield-shaded"></i>
+          <h4>Ready to Analyse</h4>
+          <p>Paste a suspicious message on the left and hit <strong>Analyse Message</strong>.</p>
+          <div class="tip-box mt-3">
+            <strong>💡 Tip:</strong> Common scam signs include urgent language, requests for OTP/password, lottery winnings, and suspicious links.
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.querySelectorAll('.risk-gauge-fill').forEach(el=>{
+  const r=parseInt(el.dataset.risk);
+  el.style.background = r>=70?'linear-gradient(90deg,#ff4d6d,#ff6b6b)':
+                        r>=40?'linear-gradient(90deg,#ffca3a,#ff9f1c)':
+                              'linear-gradient(90deg,#00ff9f,#00e5ff)';
+});
+</script>
+{% endblock %}

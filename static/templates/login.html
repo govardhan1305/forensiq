@@ -1,0 +1,413 @@
+{% extends "base.html" %}
+{% block title %}Login — ForensIQ{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+  <!-- Background grid effect -->
+  <div class="auth-grid-bg"></div>
+
+  <!-- Floating particles -->
+  <div class="auth-particles">
+    <span class="ap" style="left:10%;top:20%;animation-delay:0s"></span>
+    <span class="ap" style="left:25%;top:60%;animation-delay:1s"></span>
+    <span class="ap" style="left:70%;top:15%;animation-delay:2s"></span>
+    <span class="ap" style="left:85%;top:75%;animation-delay:0.5s"></span>
+    <span class="ap" style="left:50%;top:85%;animation-delay:1.5s"></span>
+  </div>
+
+  <div class="auth-container">
+
+    <!-- Logo -->
+    <div class="auth-logo">
+      <span class="brand-icon" style="font-size:2rem;"><i class="bi bi-shield-lock-fill"></i></span>
+      <span class="brand-text" style="font-size:1.4rem;">ForensIQ</span>
+    </div>
+
+    <!-- Card -->
+    <div class="auth-card">
+      <div class="auth-card-header">
+        <div class="auth-header-icon">
+          <i class="bi bi-person-lock"></i>
+        </div>
+        <h2 class="auth-title">Welcome Back</h2>
+        <p class="auth-sub">Sign in to your forensic intelligence hub</p>
+      </div>
+
+      <div class="auth-card-body">
+        <form method="POST" action="{{ url_for('login') }}" autocomplete="off">
+
+          <!-- Username -->
+          <div class="auth-field">
+            <label class="auth-label">
+              <i class="bi bi-person me-1"></i>Username / Email
+            </label>
+            <div class="auth-input-wrap">
+              <span class="auth-input-icon"><i class="bi bi-person"></i></span>
+              <input
+                type="text"
+                name="username"
+                class="fiq-input auth-input"
+                placeholder="Enter your username"
+                required
+                autofocus
+              />
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div class="auth-field">
+            <label class="auth-label">
+              <i class="bi bi-lock me-1"></i>Password
+            </label>
+            <div class="auth-input-wrap">
+              <span class="auth-input-icon"><i class="bi bi-lock"></i></span>
+              <input
+                type="password"
+                name="password"
+                id="loginPassword"
+                class="fiq-input auth-input"
+                placeholder="Enter your password"
+                required
+              />
+              <button type="button" class="auth-eye-btn" onclick="togglePass('loginPassword', this)">
+                <i class="bi bi-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Remember & Forgot -->
+          <div class="auth-row">
+            <label class="auth-check">
+              <input type="checkbox" name="remember" />
+              <span>Remember me</span>
+            </label>
+            <a href="#" class="auth-forgot">Forgot password?</a>
+          </div>
+
+          <!-- Submit -->
+          <button type="submit" class="btn-fiq-primary auth-submit-btn">
+            <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+          </button>
+
+        </form>
+
+        <!-- Divider -->
+        <div class="auth-divider">
+          <span>or continue with</span>
+        </div>
+
+        <!-- Social -->
+        <div class="auth-social">
+          <button class="auth-social-btn" title="Google">
+            <i class="bi bi-google"></i> Google
+          </button>
+          <button class="auth-social-btn" title="GitHub">
+            <i class="bi bi-github"></i> GitHub
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Footer link -->
+      <div class="auth-card-footer">
+        Don't have an account?
+        <a href="{{ url_for('signup') }}" class="auth-link">Create one here</a>
+      </div>
+    </div>
+
+    <!-- Security badge -->
+    <div class="auth-security-badge">
+      <i class="bi bi-shield-fill-check text-cyan me-1"></i>
+      <span>256-bit encrypted &amp; secure login</span>
+    </div>
+
+  </div>
+</div>
+
+<style>
+/* ── Auth Layout ─────────────────────────────────── */
+.auth-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  padding: 2rem 1rem;
+  background: var(--bg-dark);
+}
+
+.auth-grid-bg {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(13,148,136,.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(13,148,136,.07) 1px, transparent 1px);
+  background-size: 36px 36px;
+  mask-image: radial-gradient(ellipse 90% 90% at 50% 50%, black 30%, transparent 100%);
+  pointer-events: none;
+}
+
+/* Floating particles */
+.auth-particles { position:absolute; inset:0; pointer-events:none; }
+.ap {
+  position: absolute;
+  width: 4px; height: 4px;
+  background: var(--cyan);
+  border-radius: 50%;
+  opacity: .4;
+  animation: apFloat 6s ease-in-out infinite alternate;
+}
+@keyframes apFloat {
+  from { transform: translateY(0) scale(1); opacity:.4; }
+  to   { transform: translateY(-30px) scale(1.5); opacity:.1; }
+}
+
+/* ── Auth Container ──────────────────────────────── */
+.auth-container {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  animation: authFadeIn .5s ease both;
+}
+@keyframes authFadeIn {
+  from { opacity:0; transform:translateY(20px); }
+  to   { opacity:1; transform:none; }
+}
+
+/* ── Logo ────────────────────────────────────────── */
+.auth-logo {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin-bottom: .25rem;
+}
+
+/* ── Card ────────────────────────────────────────── */
+.auth-card {
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 8px 40px rgba(13,148,136,.15);
+}
+
+.auth-card-header {
+  background: var(--bg-card2);
+  border-bottom: 1px solid var(--border-color);
+  padding: 1.75rem 1.75rem 1.25rem;
+  text-align: center;
+}
+
+.auth-header-icon {
+  width: 56px; height: 56px;
+  background: rgba(13,148,136,.12);
+  border: 1px solid rgba(13,148,136,.35);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem;
+  color: var(--cyan);
+  margin: 0 auto .75rem;
+  filter: drop-shadow(0 0 8px var(--cyan));
+}
+
+.auth-title {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 .25rem;
+}
+
+.auth-sub {
+  color: var(--text-muted);
+  font-size: .82rem;
+  margin: 0;
+}
+
+.auth-card-body { padding: 1.5rem 1.75rem; }
+
+/* ── Fields ──────────────────────────────────────── */
+.auth-field { margin-bottom: 1.1rem; }
+
+.auth-label {
+  display: block;
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: .4rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.auth-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.auth-input-icon {
+  position: absolute;
+  left: .75rem;
+  color: var(--cyan);
+  font-size: .9rem;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.auth-input {
+  width: 100%;
+  padding: .6rem .75rem .6rem 2.25rem !important;
+  background: var(--bg-card2) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
+  border-radius: var(--radius-sm) !important;
+  font-size: .88rem !important;
+  transition: border-color .2s, box-shadow .2s !important;
+}
+.auth-input:focus {
+  border-color: var(--cyan) !important;
+  box-shadow: 0 0 0 3px rgba(13,148,136,.18) !important;
+  outline: none !important;
+}
+
+.auth-eye-btn {
+  position: absolute;
+  right: .75rem;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: .9rem;
+  padding: 0;
+  transition: color .2s;
+}
+.auth-eye-btn:hover { color: var(--cyan); }
+
+/* ── Remember row ────────────────────────────────── */
+.auth-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.auth-check {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  font-size: .82rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.auth-check input { accent-color: var(--cyan); }
+
+.auth-forgot {
+  font-size: .82rem;
+  color: var(--cyan);
+  text-decoration: none;
+}
+.auth-forgot:hover { text-decoration: underline; }
+
+/* ── Submit ──────────────────────────────────────── */
+.auth-submit-btn {
+  width: 100%;
+  justify-content: center;
+  padding: .7rem !important;
+  font-size: .9rem !important;
+  letter-spacing: .03em;
+}
+
+/* ── Divider ─────────────────────────────────────── */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin: 1.25rem 0;
+  color: var(--text-muted);
+  font-size: .78rem;
+}
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-color);
+}
+
+/* ── Social ──────────────────────────────────────── */
+.auth-social {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .75rem;
+}
+
+.auth-social-btn {
+  background: var(--bg-card2);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  padding: .5rem;
+  font-size: .82rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .4rem;
+  transition: all .2s;
+}
+.auth-social-btn:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  background: var(--cyan-glow);
+}
+
+/* ── Card Footer ─────────────────────────────────── */
+.auth-card-footer {
+  background: var(--bg-card2);
+  border-top: 1px solid var(--border-color);
+  padding: 1rem 1.75rem;
+  text-align: center;
+  font-size: .83rem;
+  color: var(--text-muted);
+}
+
+.auth-link {
+  color: var(--cyan);
+  font-weight: 600;
+  text-decoration: none;
+  margin-left: .25rem;
+}
+.auth-link:hover { text-decoration: underline; }
+
+/* ── Security badge ──────────────────────────────── */
+.auth-security-badge {
+  font-size: .75rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function togglePass(id, btn) {
+  const input = document.getElementById(id);
+  const icon  = btn.querySelector('i');
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.className = 'bi bi-eye-slash';
+  } else {
+    input.type = 'password';
+    icon.className = 'bi bi-eye';
+  }
+}
+</script>
+{% endblock %}

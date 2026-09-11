@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — ForensIQ{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+
+  <!-- Header -->
+  <div class="page-header mb-4">
+    <h1 class="page-title"><i class="bi bi-speedometer2 me-2 text-cyan"></i>Dashboard</h1>
+    <p class="page-sub">Real-time overview of your cyber forensics activity</p>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="row g-3 mb-4">
+    {% set cards = [
+      ('Total Cases',    counts.total,      'folder2-open',      'text-cyan',   'border-cyan'),
+      ('Scams Detected', counts.scam,       'exclamation-triangle-fill', 'text-red', 'border-red'),
+      ('Phishing',       counts.phishing,   'link-45deg',        'text-orange', 'border-orange'),
+      ('Fraud',          counts.fraud,      'cash-coin',         'text-yellow', 'border-yellow'),
+      ('Safe',           counts.safe,       'shield-check-fill', 'text-green',  'border-green'),
+      ('Suspicious',     counts.suspicious, 'question-circle',   'text-purple', 'border-purple'),
+    ] %}
+    {% for label, val, icon, tc, bc in cards %}
+    <div class="col-6 col-md-4 col-xl-2">
+      <div class="stat-card {{ bc }}">
+        <div class="stat-icon {{ tc }}"><i class="bi bi-{{ icon }}"></i></div>
+        <div class="stat-val {{ tc }}">{{ val }}</div>
+        <div class="stat-label">{{ label }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="row g-4 mb-4">
+    <!-- Result Distribution Chart -->
+    <div class="col-md-5">
+      <div class="fiq-card h-100">
+        <div class="fiq-card-header">
+          <i class="bi bi-pie-chart me-2 text-cyan"></i>Result Distribution
+        </div>
+        <div class="fiq-card-body">
+          <canvas id="resultChart" height="220"></canvas>
+        </div>
+      </div>
+    </div>
+    <!-- Daily Activity Chart -->
+    <div class="col-md-7">
+      <div class="fiq-card h-100">
+        <div class="fiq-card-header">
+          <i class="bi bi-activity me-2 text-cyan"></i>7-Day Activity
+        </div>
+        <div class="fiq-card-body">
+          <canvas id="dailyChart" height="220"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Action Grid -->
+  <div class="row g-3 mb-4">
+    <div class="col-12">
+      <div class="fiq-card">
+        <div class="fiq-card-header">
+          <i class="bi bi-lightning me-2 text-cyan"></i>Quick Actions
+        </div>
+        <div class="fiq-card-body">
+          <div class="row g-2">
+            {% set actions = [
+              ('analyze_message',  'chat-text',      'Analyze Message',   'text-cyan'),
+              ('analyze_link',     'link-45deg',     'Check Link',        'text-yellow'),
+              ('analyze_screenshot','image',         'Screenshot',        'text-green'),
+              ('analyze_job_offer','briefcase',      'Job Detector',      'text-orange'),
+              ('chatbot',          'robot',          'AI Chat',           'text-purple'),
+              ('awareness',        'lightbulb',      'Safety Tips',       'text-pink'),
+            ] %}
+            {% for ep, icon, label, tc in actions %}
+            <div class="col-6 col-sm-4 col-md-2">
+              <a href="{{ url_for(ep) }}" class="quick-action-btn {{ tc }}">
+                <i class="bi bi-{{ icon }}"></i>
+                <span>{{ label }}</span>
+              </a>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Evidence Table -->
+  <div class="fiq-card">
+    <div class="fiq-card-header d-flex justify-content-between align-items-center">
+      <span><i class="bi bi-clock-history me-2 text-cyan"></i>Recent Cases</span>
+      <a href="{{ url_for('evidence_locker') }}" class="btn-sm-outline">View All</a>
+    </div>
+    <div class="fiq-card-body p-0">
+      {% if recent %}
+      <div class="table-responsive">
+        <table class="table fiq-table mb-0">
+          <thead>
+            <tr>
+              <th>ID</th><th>Type</th><th>Content Preview</th>
+              <th>Verdict</th><th>Risk</th><th>Date</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in recent %}
+            <tr>
+              <td><code class="text-cyan">{{ item.ev_id }}</code></td>
+              <td><span class="type-badge type-{{ item.type }}">{{ item.type }}</span></td>
+              <td class="text-truncate" style="max-width:200px">{{ item.content }}</td>
+              <td><span class="verdict-badge verdict-{{ item.result }}">{{ item.result }}</span></td>
+              <td>
+                <div class="risk-bar-wrap">
+                  <div class="risk-bar" style="width:{{ item.risk }}%"
+                       data-risk="{{ item.risk }}"></div>
+                  <span>{{ item.risk }}%</span>
+                </div>
+              </td>
+              <td class="text-muted small">{{ item.created[:16] }}</td>
+              <td>
+                <a href="{{ url_for('view_evidence', ev_id=item.ev_id) }}"
+                   class="btn-icon text-cyan" title="View"><i class="bi bi-eye"></i></a>
+                <a href="{{ url_for('generate_complaint', ev_id=item.ev_id) }}"
+                   class="btn-icon text-yellow" title="Complaint"><i class="bi bi-file-text"></i></a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-state py-5">
+        <i class="bi bi-inbox text-cyan"></i>
+        <p>No cases analysed yet. <a href="{{ url_for('analyze_message') }}">Start analysing now →</a></p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+fetch('/api/stats').then(r=>r.json()).then(d=>{
+  const COLORS = {
+    SAFE:'#00ff9f', SCAM:'#ff4d6d', PHISHING:'#ff9f1c',
+    FRAUD:'#ffca3a', SUSPICIOUS:'#c77dff', UNKNOWN:'#adb5bd'
+  };
+
+  // Pie chart
+  const br = d.by_result || {};
+  new Chart(document.getElementById('resultChart'), {
+    type:'doughnut',
+    data:{
+      labels: Object.keys(br),
+      datasets:[{
+        data: Object.values(br),
+        backgroundColor: Object.keys(br).map(k=>COLORS[k]||COLORS.UNKNOWN),
+        borderWidth:0, hoverOffset:6
+      }]
+    },
+    options:{
+      plugins:{ legend:{ labels:{ color:'#adb5bd', font:{family:'Exo 2'} } } },
+      cutout:'65%'
+    }
+  });
+
+  // Line chart
+  const daily = d.daily || [];
+  new Chart(document.getElementById('dailyChart'), {
+    type:'line',
+    data:{
+      labels: daily.map(x=>x.date.slice(5)),
+      datasets:[{
+        label:'Cases',
+        data: daily.map(x=>x.count),
+        borderColor:'#00e5ff', backgroundColor:'rgba(0,229,255,.12)',
+        fill:true, tension:.4, pointBackgroundColor:'#00e5ff'
+      }]
+    },
+    options:{
+      scales:{
+        x:{ ticks:{color:'#6c757d'}, grid:{color:'rgba(255,255,255,.05)'} },
+        y:{ ticks:{color:'#6c757d'}, grid:{color:'rgba(255,255,255,.05)'}, beginAtZero:true }
+      },
+      plugins:{ legend:{ labels:{ color:'#adb5bd' } } }
+    }
+  });
+});
+
+// Colour risk bars
+document.querySelectorAll('.risk-bar').forEach(el=>{
+  const r = parseInt(el.dataset.risk);
+  el.style.background = r >= 70 ? '#ff4d6d' : r >= 40 ? '#ffca3a' : '#00ff9f';
+});
+</script>
+{% endblock %}

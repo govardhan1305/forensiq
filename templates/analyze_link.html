@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}Link Checker — ForensIQ{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="page-header mb-4">
+    <h1 class="page-title"><i class="bi bi-link-45deg me-2 text-yellow"></i>Link & URL Checker</h1>
+    <p class="page-sub">Detect phishing links, malicious redirects, and suspicious websites</p>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-5">
+      <div class="fiq-card">
+        <div class="fiq-card-header"><i class="bi bi-globe me-2 text-yellow"></i>Enter URL</div>
+        <div class="fiq-card-body">
+          <form method="POST">
+            <div class="mb-3">
+              <label class="form-label text-muted">Suspicious URL / Link</label>
+              <input type="text" name="url" class="form-control fiq-input"
+                placeholder="https://example-suspicious-link.xyz/verify"
+                value="{{ request.form.url if result else '' }}" required />
+            </div>
+            <button type="submit" class="btn-fiq-primary w-100">
+              <i class="bi bi-search me-2"></i>Check URL
+            </button>
+          </form>
+
+          <!-- Heuristic indicators -->
+          <div class="mt-4">
+            <p class="text-muted small mb-2">What we check:</p>
+            <ul class="check-list">
+              <li><i class="bi bi-check-circle text-cyan me-2"></i>Suspicious TLDs (.xyz, .tk, .ml…)</li>
+              <li><i class="bi bi-check-circle text-cyan me-2"></i>IP-based URLs (no domain name)</li>
+              <li><i class="bi bi-check-circle text-cyan me-2"></i>Excessive hyphens & unusual length</li>
+              <li><i class="bi bi-check-circle text-cyan me-2"></i>Lookalike domains (sbi-verify.xyz)</li>
+              <li><i class="bi bi-check-circle text-cyan me-2"></i>AI deep-pattern analysis</li>
+            </ul>
+          </div>
+
+          <!-- Sample URLs -->
+          <div class="mt-3">
+            <p class="text-muted small mb-2">Try a sample:</p>
+            <div class="d-flex flex-wrap gap-1">
+              {% set samples = [
+                ('Phishing',    'http://sbi-kyc-verify.xyz/login?id=123456'),
+                ('Suspicious',  'http://192.168.1.1/bank/reset-password'),
+                ('Normal',      'https://www.google.com/search?q=cybersecurity'),
+              ] %}
+              {% for name, url in samples %}
+              <button class="sample-btn" onclick="document.querySelector('input[name=url]').value='{{ url }}'">{{ name }}</button>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-7">
+      {% if result %}
+      {% set verdict = result.verdict %}
+      <div class="result-card verdict-{{ verdict }}">
+        <div class="result-header">
+          <div class="verdict-icon verdict-icon-{{ verdict }}">
+            {% if verdict == 'SAFE' %}<i class="bi bi-shield-check-fill"></i>
+            {% elif verdict == 'PHISHING' %}<i class="bi bi-link-45deg"></i>
+            {% else %}<i class="bi bi-exclamation-octagon-fill"></i>{% endif %}
+          </div>
+          <div>
+            <div class="verdict-label">Verdict: <span class="verdict-{{ verdict }}">{{ verdict }}</span></div>
+            <div class="verdict-cat">{{ result.get('category','—') }}</div>
+          </div>
+          <div class="ms-auto text-end">
+            <div class="risk-score verdict-{{ verdict }}">{{ result.risk_score }}</div>
+            <div class="text-muted small">Risk Score</div>
+          </div>
+        </div>
+
+        <div class="risk-gauge-bar mb-3">
+          <div class="risk-gauge-fill" style="width:{{ result.risk_score }}%"
+               data-risk="{{ result.risk_score }}"></div>
+        </div>
+
+        {% if result.get('heuristics') %}
+        <div class="result-section">
+          <h6 class="result-section-title"><i class="bi bi-cpu me-1 text-cyan"></i>Heuristic Flags</h6>
+          <ul class="flag-list">
+            {% for h in result.heuristics %}
+            <li><i class="bi bi-exclamation-triangle-fill text-yellow me-1"></i>{{ h }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+
+        <div class="result-section">
+          <h6 class="result-section-title"><i class="bi bi-info-circle me-1 text-cyan"></i>AI Explanation</h6>
+          <p class="result-text">{{ result.get('explanation','') }}</p>
+        </div>
+
+        {% if result.get('red_flags') %}
+        <div class="result-section">
+          <h6 class="result-section-title"><i class="bi bi-flag-fill me-1 text-red"></i>Red Flags</h6>
+          <ul class="flag-list">
+            {% for flag in result.red_flags %}<li><i class="bi bi-x-circle-fill text-red me-1"></i>{{ flag }}</li>{% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+
+        {% if result.get('actions') %}
+        <div class="result-section">
+          <h6 class="result-section-title"><i class="bi bi-lightning-fill me-1 text-yellow"></i>Recommended Actions</h6>
+          <ul class="action-list">
+            {% for a in result.actions %}<li><i class="bi bi-chevron-right text-cyan me-1"></i>{{ a }}</li>{% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+
+        <div class="result-footer">
+          <span class="text-muted small">Evidence ID: <code class="text-cyan">{{ result.ev_id }}</code></span>
+          <a href="{{ url_for('generate_complaint', ev_id=result.ev_id) }}" class="btn-sm-outline">
+            <i class="bi bi-file-text me-1"></i>Generate Complaint
+          </a>
+        </div>
+      </div>
+      {% else %}
+      <div class="fiq-card empty-analyze">
+        <div class="empty-analyze-inner">
+          <i class="bi bi-link-45deg"></i>
+          <h4>URL Safety Check</h4>
+          <p>Enter any suspicious URL on the left to check it for phishing, malware, or fraud.</p>
+          <div class="tip-box mt-3">
+            <strong>💡 Warning signs:</strong> Misspelled domains, unusual TLDs, requests for login credentials, or URLs containing IP addresses.
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.querySelectorAll('.risk-gauge-fill').forEach(el=>{
+  const r=parseInt(el.dataset.risk);
+  el.style.background=r>=70?'linear-gradient(90deg,#ff4d6d,#ff6b6b)':r>=40?'linear-gradient(90deg,#ffca3a,#ff9f1c)':'linear-gradient(90deg,#00ff9f,#00e5ff)';
+});
+</script>
+{% endblock %}

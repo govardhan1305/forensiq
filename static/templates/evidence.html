@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Evidence Locker — ForensIQ{% endblock %}
+{% block content %}
+<div class="container-fluid px-4 py-4">
+  <div class="page-header mb-4 d-flex justify-content-between align-items-center">
+    <div>
+      <h1 class="page-title"><i class="bi bi-archive me-2 text-cyan"></i>Evidence Locker</h1>
+      <p class="page-sub">{{ total }} case{{ 's' if total != 1 }} stored in your secure local database</p>
+    </div>
+    <a href="{{ url_for('analyze_message') }}" class="btn-fiq-primary">
+      <i class="bi bi-plus-circle me-2"></i>New Analysis
+    </a>
+  </div>
+
+  {% if items %}
+  <div class="row g-3">
+    {% for item in items %}
+    <div class="col-sm-6 col-lg-4 col-xl-3">
+      <div class="evidence-card">
+        <div class="ev-card-top">
+          <span class="type-badge type-{{ item.type }}">{{ item.type }}</span>
+          <span class="verdict-badge verdict-{{ item.result }}">{{ item.result }}</span>
+        </div>
+        <div class="ev-card-id"><code>{{ item.ev_id }}</code></div>
+        <p class="ev-card-content">{{ item.content[:120] }}{% if item.content|length > 120 %}…{% endif %}</p>
+        <div class="ev-card-risk">
+          <div class="ev-risk-bar">
+            <div class="ev-risk-fill" style="width:{{ item.risk }}%" data-risk="{{ item.risk }}"></div>
+          </div>
+          <span class="ev-risk-val">{{ item.risk }}%</span>
+        </div>
+        <div class="ev-card-date text-muted small">{{ item.created[:16] }}</div>
+        <div class="ev-card-actions">
+          <a href="{{ url_for('view_evidence', ev_id=item.ev_id) }}" class="ev-btn text-cyan" title="View Details">
+            <i class="bi bi-eye"></i>
+          </a>
+          <a href="{{ url_for('generate_complaint', ev_id=item.ev_id) }}" class="ev-btn text-yellow" title="Generate Complaint">
+            <i class="bi bi-file-earmark-text"></i>
+          </a>
+          <form method="POST" action="{{ url_for('delete_evidence', ev_id=item.ev_id) }}"
+                style="display:inline"
+                onsubmit="return confirm('Delete this evidence record?')">
+            <button type="submit" class="ev-btn text-red" title="Delete"><i class="bi bi-trash3"></i></button>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Pagination -->
+  {% if pages > 1 %}
+  <nav class="mt-4 d-flex justify-content-center">
+    <ul class="pagination fiq-pagination">
+      {% for p in range(1, pages+1) %}
+      <li class="page-item {% if p == page %}active{% endif %}">
+        <a class="page-link" href="?page={{ p }}">{{ p }}</a>
+      </li>
+      {% endfor %}
+    </ul>
+  </nav>
+  {% endif %}
+
+  {% else %}
+  <div class="fiq-card">
+    <div class="empty-state py-5">
+      <i class="bi bi-inbox text-cyan"></i>
+      <h4>No Evidence Yet</h4>
+      <p>Start analysing messages, links, or screenshots and they will be stored here automatically.</p>
+      <a href="{{ url_for('analyze_message') }}" class="btn-fiq-primary mt-2">
+        <i class="bi bi-plus-circle me-2"></i>Start Analysing
+      </a>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.querySelectorAll('.ev-risk-fill').forEach(el=>{
+  const r=parseInt(el.dataset.risk);
+  el.style.background=r>=70?'#ff4d6d':r>=40?'#ffca3a':'#00ff9f';
+});
+</script>
+{% endblock %}

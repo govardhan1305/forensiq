@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Cyber Awareness — ForensIQ{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="page-header mb-4">
+    <h1 class="page-title"><i class="bi bi-lightbulb me-2 text-yellow"></i>Cyber Awareness Hub</h1>
+    <p class="page-sub">Stay informed with AI-generated cybersecurity tips and best practices</p>
+  </div>
+
+  <!-- Emergency Numbers -->
+  <div class="alert-emergency mb-4">
+    <i class="bi bi-telephone-fill me-2"></i>
+    <strong>Cybercrime Helpline:</strong> <span class="text-white">1930</span>
+    &nbsp;|&nbsp;
+    <strong>Website:</strong> <a href="https://cybercrime.gov.in" target="_blank" class="text-cyan">cybercrime.gov.in</a>
+    &nbsp;|&nbsp;
+    <strong>Women Helpline:</strong> <span class="text-white">181</span>
+  </div>
+
+  <div class="row g-4">
+    <!-- AI Tips -->
+    <div class="col-lg-8">
+      <div class="fiq-card">
+        <div class="fiq-card-header">
+          <i class="bi bi-robot me-2 text-cyan"></i>AI-Generated Safety Tips
+          <span class="badge bg-cyan ms-2 text-dark">Live</span>
+        </div>
+        <div class="fiq-card-body">
+          {% if ai_tips %}
+          <div class="tips-grid">
+            {% for tip in ai_tips %}
+            {% if tip %}
+            <div class="tip-item">
+              <div class="tip-num">{{ loop.index }}</div>
+              <p class="tip-text">{{ tip }}</p>
+            </div>
+            {% endif %}
+            {% endfor %}
+          </div>
+          {% else %}
+          <p class="text-muted">Could not load AI tips. Please check your API key.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Static Guides -->
+    <div class="col-lg-4">
+      <div class="fiq-card mb-4">
+        <div class="fiq-card-header"><i class="bi bi-exclamation-triangle me-2 text-red"></i>Never Share These</div>
+        <div class="fiq-card-body">
+          <ul class="never-list">
+            {% for item in ['Bank OTP / PIN','Aadhaar / PAN number','CVV / Card number','Password or passphrase','UPI PIN','Remote desktop access','Personal photos to strangers'] %}
+            <li><i class="bi bi-x-octagon-fill text-red me-2"></i>{{ item }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+
+      <div class="fiq-card mb-4">
+        <div class="fiq-card-header"><i class="bi bi-shield-check me-2 text-green"></i>Stay Safe Online</div>
+        <div class="fiq-card-body">
+          <ul class="safe-list">
+            {% for item in ['Use 2FA on all accounts','Keep software updated','Use strong, unique passwords','Verify links before clicking','Report suspicious calls/messages','Backup your data regularly'] %}
+            <li><i class="bi bi-check-circle-fill text-green me-2"></i>{{ item }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+
+      <div class="fiq-card">
+        <div class="fiq-card-header"><i class="bi bi-telephone me-2 text-cyan"></i>Report Cybercrime</div>
+        <div class="fiq-card-body">
+          <div class="report-steps">
+            <div class="rs"><span class="rs-n">1</span>Call <strong class="text-cyan">1930</strong> (financial fraud)</div>
+            <div class="rs"><span class="rs-n">2</span>Visit <a href="https://cybercrime.gov.in" target="_blank" class="text-cyan">cybercrime.gov.in</a></div>
+            <div class="rs"><span class="rs-n">3</span>File at nearest police station</div>
+            <div class="rs"><span class="rs-n">4</span>Preserve all evidence (screenshots, messages)</div>
+            <div class="rs"><span class="rs-n">5</span>Use ForensIQ to generate a formal complaint</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Threat Categories Info -->
+  <div class="row g-3 mt-2">
+    <div class="col-12">
+      <h4 class="section-title mb-3">Common Scam Types — Know Your Enemy</h4>
+    </div>
+    {% set scam_info = [
+      ('Lottery Scam',     'trophy-fill',     'text-yellow', 'You receive a call/message saying you won a lottery. They ask for a processing fee upfront. Legitimate lotteries NEVER ask for money to claim prizes.'),
+      ('Bank Phishing',    'bank2',           'text-cyan',   'Fake SMS/emails impersonating banks, asking you to verify OTP, login, or account details via a suspicious link. Banks NEVER ask for OTP over phone/email.'),
+      ('KYC Fraud',        'person-badge',    'text-orange', '"Your account will be blocked if KYC not updated." Scammers pose as bank agents and trick you into sharing Aadhaar, PAN, or OTP.'),
+      ('Investment Fraud', 'graph-up-arrow',  'text-green',  '"Double your money in 24 hours." Promises of guaranteed high returns are always scams. Real investments have risk.'),
+      ('Job Scam',         'briefcase-fill',  'text-purple', 'Fake recruiters offer high-paying work-from-home jobs and ask for joining/registration fees. No legitimate employer charges fees to hire you.'),
+      ('Tech Support',     'laptop-fill',     'text-red',    '"Your device has a virus, call Microsoft/Apple." These calls are fake. Never give remote access to your computer to strangers.'),
+    ] %}
+    {% for title, icon, tc, desc in scam_info %}
+    <div class="col-md-6 col-lg-4">
+      <div class="scam-info-card">
+        <div class="scam-info-icon {{ tc }}"><i class="bi bi-{{ icon }}"></i></div>
+        <h6 class="scam-info-title {{ tc }}">{{ title }}</h6>
+        <p class="scam-info-desc">{{ desc }}</p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

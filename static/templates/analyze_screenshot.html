@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}Screenshot Analyzer — ForensIQ{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="page-header mb-4">
+    <h1 class="page-title"><i class="bi bi-image me-2 text-green"></i>Screenshot Analyzer</h1>
+    <p class="page-sub">Upload a screenshot — OCR extracts text and AI analyses it for threats</p>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-5">
+      <div class="fiq-card">
+        <div class="fiq-card-header"><i class="bi bi-upload me-2 text-green"></i>Upload Screenshot</div>
+        <div class="fiq-card-body">
+          <form method="POST" enctype="multipart/form-data">
+            <div class="mb-3">
+              <div class="upload-zone" id="uploadZone">
+                <input type="file" name="screenshot" id="fileInput"
+                       accept=".png,.jpg,.jpeg,.gif,.bmp,.webp"
+                       class="upload-input" required />
+                <div class="upload-inner">
+                  <i class="bi bi-cloud-arrow-up-fill"></i>
+                  <p>Drop image here or <span class="text-cyan">click to browse</span></p>
+                  <p class="small text-muted">PNG, JPG, GIF, BMP, WEBP — max 10 MB</p>
+                </div>
+                <div class="upload-preview" id="preview" style="display:none">
+                  <img id="previewImg" src="" alt="Preview" />
+                </div>
+              </div>
+            </div>
+            <button type="submit" class="btn-fiq-primary w-100">
+              <i class="bi bi-search me-2"></i>Analyse Screenshot
+            </button>
+          </form>
+
+          {% if ocr_text %}
+          <div class="mt-3">
+            <div class="fiq-card-header mt-3"><i class="bi bi-file-text me-2 text-cyan"></i>OCR Extracted Text</div>
+            <div class="ocr-box">{{ ocr_text }}</div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-7">
+      {% if result %}
+      {% set verdict = result.verdict %}
+      <div class="result-card verdict-{{ verdict }}">
+        <div class="result-header">
+          <div class="verdict-icon verdict-icon-{{ verdict }}">
+            <i class="bi bi-{% if verdict=='SAFE' %}shield-check-fill{% else %}exclamation-octagon-fill{% endif %}"></i>
+          </div>
+          <div>
+            <div class="verdict-label">Verdict: <span class="verdict-{{ verdict }}">{{ verdict }}</span></div>
+            <div class="verdict-cat">{{ result.get('category','—') }}</div>
+          </div>
+          <div class="ms-auto text-end">
+            <div class="risk-score verdict-{{ verdict }}">{{ result.risk_score }}</div>
+            <div class="text-muted small">Risk Score</div>
+          </div>
+        </div>
+
+        <div class="risk-gauge-bar mb-3">
+          <div class="risk-gauge-fill" style="width:{{ result.risk_score }}%" data-risk="{{ result.risk_score }}"></div>
+        </div>
+
+        <div class="result-section">
+          <h6 class="result-section-title"><i class="bi bi-info-circle me-1 text-cyan"></i>AI Explanation</h6>
+          <p class="result-text">{{ result.get('explanation','') }}</p>
+        </div>
+
+        {% if result.get('red_flags') %}
+        <div class="result-section">
+          <h6 class="result-section-title"><i class="bi bi-flag-fill me-1 text-red"></i>Red Flags</h6>
+          <ul class="flag-list">
+            {% for f in result.red_flags %}<li><i class="bi bi-x-circle-fill text-red me-1"></i>{{ f }}</li>{% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+
+        {% if result.get('actions') %}
+        <div class="result-section">
+          <h6 class="result-section-title"><i class="bi bi-lightning-fill me-1 text-yellow"></i>Recommended Actions</h6>
+          <ul class="action-list">
+            {% for a in result.actions %}<li><i class="bi bi-chevron-right text-cyan me-1"></i>{{ a }}</li>{% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+
+        {% if result.get('similar') %}
+        <div class="result-section">
+          <h6 class="result-section-title"><i class="bi bi-diagram-3 me-1 text-purple"></i>Similar Patterns</h6>
+          {% for s in result.similar %}
+          <div class="similar-item">
+            <span class="similar-cat">{{ s.category }}</span>
+            <span class="similar-score">{{ s.match_score }}% match</span>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="result-footer">
+          <span class="text-muted small">Evidence ID: <code class="text-cyan">{{ result.ev_id }}</code></span>
+          <a href="{{ url_for('generate_complaint', ev_id=result.ev_id) }}" class="btn-sm-outline">
+            <i class="bi bi-file-text me-1"></i>Generate Complaint
+          </a>
+        </div>
+      </div>
+      {% else %}
+      <div class="fiq-card empty-analyze">
+        <div class="empty-analyze-inner">
+          <i class="bi bi-image-fill"></i>
+          <h4>Screenshot Analysis</h4>
+          <p>Upload a screenshot of a suspicious message, website, or notification.</p>
+          <div class="tip-box mt-3">
+            <strong>💡 How it works:</strong> We use OCR (Optical Character Recognition) to extract text from your image, then analyse it with AI.
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+const input = document.getElementById('fileInput');
+const zone  = document.getElementById('uploadZone');
+const prev  = document.getElementById('preview');
+const img   = document.getElementById('previewImg');
+
+input.addEventListener('change', e=>{
+  const file = e.target.files[0];
+  if(file){
+    img.src = URL.createObjectURL(file);
+    prev.style.display='block';
+    zone.querySelector('.upload-inner').style.display='none';
+  }
+});
+
+['dragover','dragleave','drop'].forEach(ev=>zone.addEventListener(ev,e=>{
+  e.preventDefault();
+  if(ev==='dragover') zone.classList.add('drag-active');
+  else zone.classList.remove('drag-active');
+  if(ev==='drop'){
+    input.files = e.dataTransfer.files;
+    input.dispatchEvent(new Event('change'));
+  }
+}));
+
+document.querySelectorAll('.risk-gauge-fill').forEach(el=>{
+  const r=parseInt(el.dataset.risk);
+  el.style.background=r>=70?'linear-gradient(90deg,#ff4d6d,#ff6b6b)':r>=40?'linear-gradient(90deg,#ffca3a,#ff9f1c)':'linear-gradient(90deg,#00ff9f,#00e5ff)';
+});
+</script>
+{% endblock %}
